@@ -1,0 +1,1725 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "A set of REST services to provide capabilities for serving weather information.",
+    "version": "Version 1.0",
+    "title": "Weather REST API",
+    "termsOfService": "API Terms of Service",
+    "contact": {
+      "name": "gary.sole@dtn.com"
+    }
+  },
+  "host": "wx-briefing-test02:8130",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "forecasts-controller",
+      "description": "Forecasts Controller"
+    },
+    {
+      "name": "observations-controller",
+      "description": "Observations Controller"
+    },
+    {
+      "name": "weather-stations",
+      "description": "Weather Station API."
+    }
+  ],
+  "paths": {
+    "/weather/daily-forecasts": {
+      "get": {
+        "tags": [
+          "forecasts-controller"
+        ],
+        "summary": "getDailyForecasts",
+        "operationId": "getDailyForecastsUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Latitude of the desired observation point. Will use this location (combined with lon) to find best observation.",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Longitude of the desired observation point. Will use this location (combined with lat) to find best observation.",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "The number of days of data to provide. This is a value from 1 to 15.",
+            "required": false,
+            "type": "integer",
+            "default": "1",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DailySurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/daily-observations": {
+      "get": {
+        "tags": [
+          "observations-controller"
+        ],
+        "summary": "getDailyObservations",
+        "operationId": "getDailyObservationsUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1",
+            "enum": [
+              "1"
+            ]
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Required latitude of the desired observation point. Will use this location (combined with lon) to find best observation.",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Required longitude of the desired observation point. Will use this location (combined with lat) to find best observation.",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "Optional number of days of data to provide. Defaults to 1.  This is a value from 1 to 7.",
+            "required": false,
+            "type": "integer",
+            "default": "1",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "Optional unit of measure or system used for this response.  Default is SI for metric, use US for Imperial",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DailySurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/hourly-forecasts": {
+      "get": {
+        "tags": [
+          "forecasts-controller"
+        ],
+        "summary": "getForecasts",
+        "operationId": "getForecastsUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Required Latitude of the desired observation point. Will use this location (combined with lon) to find best observation.",
+            "required": true,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Longitude of the desired observation point. Will use this location (combined with lat) to find best observation.",
+            "required": true,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "The number of days worth of hourly forecasts that should be returned in the result.  This is a numeric value with a minimum of 1 and maximum 4. It is optional. If not provided, only the most recent/current observation will be provided.",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/hourly-observations": {
+      "get": {
+        "tags": [
+          "observations-controller"
+        ],
+        "summary": "getObservations",
+        "operationId": "getObservationsUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1",
+            "enum": [
+              "1"
+            ]
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Required latitude of the desired observation point. Will use this location (combined with lon) to find best observation.",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Required longitude of the desired observation point. Will use this location (combined with lat) to find best observation.",
+            "required": false,
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "description": "Optional number of hours worth of observations that should be returned in the result.  This is a numeric value with a minimum of 1 and maximum 72. It is optional. If not provided, only the most recent/current observation will be provided.Required if lat is provided. Mutually exclusive of stationId",
+            "required": false,
+            "type": "integer",
+            "default": "1",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "Optional unit of measure or system used for this response.  Default is SI for metric, use US for Imperial",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "getStation",
+        "operationId": "getStationUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An airport ICAO station identifier.  For observationsmetar this value must be a airport ICAO identifier for an airport that provides TAFs.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/Station"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}/daily-forecasts": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "getDailyForecasts",
+        "operationId": "getDailyForecastsUsingGET_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An alpha station identifier.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "The number of days of data to provide. This is a value from 1 to 7.",
+            "required": false,
+            "type": "integer",
+            "default": "1",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DailySurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}/daily-observations": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "getDailyObservations",
+        "operationId": "getDailyObservationsUsingGET_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An alpha station identifier.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "days",
+            "in": "query",
+            "description": "The number of days of data to provide. This is a value from 1 to 7.",
+            "required": false,
+            "type": "integer",
+            "default": "1",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DailySurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}/hourly-forecasts": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "getForecasts",
+        "operationId": "getForecastsUsingGET_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An alpha station identifier.",
+            "required": true,
+            "type": "string",
+            "default": "KMSP"
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "description": "The amount of hours worth of forecasts that should be returned in the result.",
+            "required": false,
+            "type": "integer",
+            "default": "1",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}/hourly-observations": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "Get observations by hour.",
+        "operationId": "getObservationsUsingGET_1",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An alpha station identifier.",
+            "required": true,
+            "type": "string",
+            "default": "KMSP"
+          },
+          {
+            "name": "hours",
+            "in": "query",
+            "description": "The amount of hours worth of observations that should be returned in the result.  This is a numeric value with a minimum of 1 and maximum 3. It is optional. If not provided, only the most recent/current observation will be provided.Required if lat is provided. Mutually exclusive of stationId",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SurfaceData"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}/metar-observations": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "getMetar",
+        "operationId": "getMetarUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An airport ICAO station identifier.  For observationsmetar this value must be a airport ICAO identifier for an airport that provides TAFs.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/METAR"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    },
+    "/weather/stations/{stationId}/taf-forecasts": {
+      "get": {
+        "tags": [
+          "weather-stations"
+        ],
+        "summary": "getTaf",
+        "operationId": "getTafUsingGET",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/vnd.app.json+json"
+        ],
+        "parameters": [
+          {
+            "name": "version",
+            "in": "header",
+            "description": "Version of the service endpoint",
+            "required": true,
+            "type": "string",
+            "default": "1"
+          },
+          {
+            "name": "stationId",
+            "in": "path",
+            "description": "An alpha station identifier.  For forecaststaf this value must be a airport ICAO identifier for an airport that provides TAFs.",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "units",
+            "in": "query",
+            "description": "The unit of measure or system used for this response.  Use US for Imperial and SI for Metric",
+            "required": false,
+            "type": "string",
+            "default": "si",
+            "enum": [
+              "si",
+              "us"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TAF"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "When an exception during processing occurs."
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "When no records are found for the given parameters"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "METAR": {
+      "required": [
+        "metar",
+        "stationId",
+        "validDateTime"
+      ],
+      "properties": {
+        "altimeter": {
+          "type": "number",
+          "format": "double",
+          "description": "The air pressure as provided in the METAR in Inches of Mercury",
+          "minimum": 0.0,
+          "maximum": 9999.0
+        },
+        "autoGenerated": {
+          "type": "boolean",
+          "description": "An indicator to identify whether this METAR was generated automatically or manually.  True means it is automatically generated."
+        },
+        "cavok": {
+          "type": "boolean"
+        },
+        "corrected": {
+          "type": "boolean",
+          "description": "Indicates that the METAR or SPECI was corrected."
+        },
+        "dewPoint": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The dew point temperature in Celcius.",
+          "minimum": -100.0,
+          "maximum": 300.0
+        },
+        "flightRule": {
+          "type": "string",
+          "description": "The flight rule associated for the location based on visibility.",
+          "enum": [
+            "VFR",
+            "IFR",
+            "MVFR",
+            "LIFR"
+          ]
+        },
+        "metar": {
+          "type": "string",
+          "description": "The original METAR in original text format.  The other decoded values are obtained from this value."
+        },
+        "remarks": {
+          "type": "array",
+          "description": "A list of the remarks on the METAR if provided.",
+          "items": {
+            "$ref": "#/definitions/Remark"
+          }
+        },
+        "rtd": {
+          "type": "boolean"
+        },
+        "runwayVisibilities": {
+          "type": "array",
+          "description": "Runway visibility readings for each runway at the aerodrome if the visibilities are provided in the METAR.",
+          "items": {
+            "$ref": "#/definitions/RunwayVisibility"
+          }
+        },
+        "rvrnotAvailable": {
+          "type": "boolean"
+        },
+        "skyConditions": {
+          "type": "array",
+          "description": "A list of different cloud cover conditions.",
+          "items": {
+            "$ref": "#/definitions/CloudCover"
+          }
+        },
+        "stationId": {
+          "type": "string",
+          "description": "The alpha station identifier where the observation was made.  This is the most common value used for lookup of METAR by station."
+        },
+        "temperature": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The air temperature in Celcius.",
+          "minimum": -80.0,
+          "maximum": 80.0
+        },
+        "type": {
+          "type": "string",
+          "description": "Is either the METAR or SPECI or NIL.  METARS are typically on a regularly scheduled basis.  A SPECI is a METAR record outside of the regular schedule.  NIL refers to no METAR being generated for the time period.",
+          "enum": [
+            "SPECI",
+            "METAR",
+            "NIL"
+          ]
+        },
+        "validDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time in ISO8601 format with a UTC local offset of where the station is and when the observation was recorded."
+        },
+        "verticalVisibility": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The vertical visibility distance in feet.",
+          "minimum": 0.0,
+          "maximum": 10000.0
+        },
+        "visibility": {
+          "type": "number",
+          "format": "double",
+          "description": "Indicates the prevailing visibility distance in Statute Miles (SM)",
+          "minimum": 0.0,
+          "maximum": 9999.0
+        },
+        "visibilityDirection": {
+          "type": "string",
+          "description": "Indicates the prevailing visibility distance in Statute Miles (SM)",
+          "enum": [
+            "N",
+            "NE",
+            "E",
+            "SE",
+            "S",
+            "SW",
+            "W",
+            "NW"
+          ]
+        },
+        "weather": {
+          "type": "array",
+          "description": "A list of weather related conditions happening at the aerodrome.",
+          "items": {
+            "$ref": "#/definitions/Weather"
+          }
+        },
+        "windDirection": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The direction of the wind in degrees",
+          "minimum": 0.0,
+          "maximum": 360.0
+        },
+        "windDirectionMax": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Dealing with variations in wind speed, there a direction minimum in degrees",
+          "minimum": 0.0,
+          "maximum": 360.0
+        },
+        "windDirectionMin": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Dealing with variations in wind speed, there a direction minimum in degrees",
+          "minimum": 0.0,
+          "maximum": 360.0
+        },
+        "windGust": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The maximum wind gust observed",
+          "minimum": 0.0,
+          "maximum": 250.0
+        },
+        "windSpeed": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The speed of the wind.",
+          "minimum": 0.0,
+          "maximum": 250.0
+        }
+      },
+      "description": "Aviation METAR/SPECI recorded at an Aerodrome"
+    },
+    "Weather": {
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "The readable description of the weather.  This can include precipitation such as rain or snow, obscurations such as fog, smoke, mist and other such as sand storms."
+        },
+        "intensity": {
+          "type": "string",
+          "description": "The intensity of the weather, either light, moderate, heavy or in the vicinity.",
+          "enum": [
+            "light",
+            "moderate",
+            "heavy",
+            "vicinity"
+          ]
+        },
+        "weather": {
+          "type": "string",
+          "description": "The described weather.  E.g. Rain and Snow"
+        },
+        "wxcode": {
+          "type": "string",
+          "description": "The decoded METAR weather code as appearing in the raw METAR."
+        }
+      },
+      "description": "Information about the weather in the area."
+    },
+    "Station": {
+      "properties": {
+        "cityName": {
+          "type": "string",
+          "description": "A city name for the place the station exists at."
+        },
+        "daylightSavings": {
+          "type": "boolean",
+          "description": "Indicates whether this location is currently observing daylight savings"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "A display name for the place the station exists at."
+        },
+        "elevation": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The elevation in for the location of the station",
+          "minimum": -90.0,
+          "maximum": 10000.0
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The latitude in degrees for the location of the station",
+          "minimum": -180.0,
+          "maximum": 180.0
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The longitude in degrees for the location of the station",
+          "minimum": -90.0,
+          "maximum": 90.0
+        },
+        "observesDST": {
+          "type": "boolean",
+          "description": "Indicates whether this location observes daylight savings"
+        },
+        "placeName": {
+          "type": "string",
+          "description": "A common name for the place the station exists at.  In the case of an airport, this might be the airport name."
+        },
+        "timeZoneAbbrev": {
+          "type": "string",
+          "description": "An abbreviated value for the TimeZone"
+        },
+        "timeZoneName": {
+          "type": "string",
+          "description": "Name value for the TimeZone"
+        }
+      },
+      "description": "Meta information related to a weather station"
+    },
+    "RunwayVisibility": {
+      "properties": {
+        "maxVisibility": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The maximum visibility distance in feet"
+        },
+        "runway": {
+          "type": "string",
+          "description": "The runway code for the airport."
+        },
+        "visibility": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The visibility distance in feet"
+        }
+      },
+      "description": "Runway Visibility at the Aerodrome"
+    },
+    "SurfaceData": {
+      "required": [
+        "dewPoint",
+        "feelsLike",
+        "heatIndex",
+        "latitude",
+        "localTime",
+        "longitude",
+        "pressureSeaLevel",
+        "relativeHumidity",
+        "stationId",
+        "temperature",
+        "visibility",
+        "weatherCode",
+        "wetbulbTemp",
+        "windChill",
+        "windDirection",
+        "windGust",
+        "windSpeed"
+      ],
+      "properties": {
+        "dewPoint": {
+          "type": "number",
+          "format": "double",
+          "description": "The air temperature at which the air will become saturated, and dew moisture will condense into fog (or dew)"
+        },
+        "feelsLike": {
+          "type": "number",
+          "format": "double",
+          "description": "The feels like temperature combines the heat index and wind chill into a single temperature value."
+        },
+        "heatIndex": {
+          "type": "number",
+          "format": "double",
+          "description": "The combination of air temperature and relative humidity determining a perceived air temperature."
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The latitude of the station where the observation was made.",
+          "minimum": -90.0,
+          "maximum": 90.0
+        },
+        "localTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time in ISO8601 format in local time of where the station is and when the observation was made."
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The longitude of the station where the observation was made.",
+          "minimum": -180.0,
+          "maximum": 180.0
+        },
+        "precipitationAmount": {
+          "type": "number",
+          "format": "double",
+          "description": "Total of rain or ice, or liquid equivalent of snowfall."
+        },
+        "precipitationType": {
+          "type": "string",
+          "description": "The type of precipitation (rain, ice or snow)."
+        },
+        "pressureSeaLevel": {
+          "type": "number",
+          "format": "double",
+          "description": "The atmospheric pressure reduced to mean sea level."
+        },
+        "probability": {
+          "type": "number",
+          "format": "double",
+          "description": "The likelihood as a percent of precipitation during the forecast period/hour.  Only provided for forecasts."
+        },
+        "relativeHumidity": {
+          "type": "number",
+          "format": "double",
+          "description": "The amount of water vapor in the air compared to how much it could hold at this temperature (percentage)."
+        },
+        "snowFall": {
+          "type": "number",
+          "format": "double",
+          "description": "The amount of snowfall."
+        },
+        "solarDHI": {
+          "type": "number",
+          "format": "double",
+          "description": "Direct Horizontal Irradiance"
+        },
+        "solarDNI": {
+          "type": "number",
+          "format": "double",
+          "description": "Direct Normal Irradiance"
+        },
+        "solarGHI": {
+          "type": "number",
+          "format": "double",
+          "description": "Global Horizontal Irradiance - Solar Radiation"
+        },
+        "stationId": {
+          "type": "string",
+          "description": "The alpha station identifier where the observation was made"
+        },
+        "temperature": {
+          "type": "number",
+          "format": "double",
+          "description": "The air temperature in Celcius"
+        },
+        "utctime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "visibility": {
+          "type": "number",
+          "format": "double",
+          "description": "Distance visible without instrumental assistance."
+        },
+        "weatherCode": {
+          "type": "string",
+          "description": "weather"
+        },
+        "weatherDescription": {
+          "type": "string",
+          "description": "A description of the weather - . Eg Snow, Clear, Rain"
+        },
+        "wetbulbTemp": {
+          "type": "number",
+          "format": "double",
+          "description": "The lowest temperature that can be reached by the evaporation of water only."
+        },
+        "windChill": {
+          "type": "number",
+          "format": "double",
+          "description": "The combination of air temperature and wind speed determining a perceived air temperature."
+        },
+        "windDirection": {
+          "type": "integer",
+          "format": "int32",
+          "description": " The direction the wind is coming from, rounded to the nearest 10 degrees of compass heading."
+        },
+        "windGust": {
+          "type": "number",
+          "format": "double",
+          "description": "The speed of wind gusts (if reported, this is the peak instantaneous wind speed observed in the 10 minutes prior to the observation)."
+        },
+        "windSpeed": {
+          "type": "number",
+          "format": "double",
+          "description": "The sustained speed of the wind as measured at a height of 10m or 33ft (calculated as the average wind speed over the two minutes preceding the observation)."
+        }
+      },
+      "description": "Observations and Forecasts of ground based information observed at a particular station."
+    },
+    "DailySurfaceData": {
+      "required": [
+        "date",
+        "latitude",
+        "longitude",
+        "stationId"
+      ],
+      "properties": {
+        "avgDewPoint": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly dew point values."
+        },
+        "avgFeelsLike": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly feels like temperatures."
+        },
+        "avgHeatIndex": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly heat index temperatures."
+        },
+        "avgPressure": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly barometric pressure."
+        },
+        "avgRelativeHumidity": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly relative humidity values."
+        },
+        "avgSoilMoisture": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The estimated soil moisture content at a 4 inch depth. Only available for weather stations with soil moisture sensors."
+        },
+        "avgSoilTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The estimated soil temperature in Celcius. Only available for weather stations with soil moisture sensors."
+        },
+        "avgTemperature": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the Maximum Temperature and the Minimum Temperature."
+        },
+        "avgWetBulbGlobeTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The average of the 24 hourly Wet Bulb Globe temperatures."
+        },
+        "avgWetBulbTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly wet bulb temperature values."
+        },
+        "avgWindChill": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly wind chill temperatures."
+        },
+        "avgWindSpeed": {
+          "type": "integer",
+          "format": "int32",
+          "description": "An average of the 24 hourly wind speed values"
+        },
+        "cloudCoverPercent": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The average percentage of sky covered by clouds.  Not available for forecasts."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date (excluding time) in ISO8601 format of the date for the aggregated values. The date is for the local time midnight to midnight on the date provided."
+        },
+        "evapotranspiration": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The daily total of evaporation and plant transpiration from the earth's land surface assuming a grass cover (based on the FAO 56 Penman-Monteith calculation)"
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The latitude of the station where the observation was made.",
+          "minimum": -90.0,
+          "maximum": 90.0
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double",
+          "description": "The longitude of the station where the observation was made.",
+          "minimum": -180.0,
+          "maximum": 180.0
+        },
+        "maxFeelsLike": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest feels like temperature to occur."
+        },
+        "maxHeatIndex": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest hourly heat index temperature."
+        },
+        "maxSoilMoisture": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest estimated soil moisture content. Only available for weather stations with soil moisture sensors."
+        },
+        "maxSoilTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest estimated soil temperature in Celcius Only available for weather stations with soil moisture sensors."
+        },
+        "maxTemperature": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest (warmest) temperature to occur in the day."
+        },
+        "maxWetBulbGlobeTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest Wet Bulb Globe temperature measured"
+        },
+        "maxWindChill": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest wind chill value."
+        },
+        "maxWindSpeed": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The highest wind speed or gust value for the day"
+        },
+        "minFeelsLike": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The lowest feels like temperature to occur."
+        },
+        "minHeatIndex": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The minimum heat index temperature during the period."
+        },
+        "minSoilMoisture": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The lowest estimated soil moisture content in the day. Only available for weather stations with soil moisture sensors."
+        },
+        "minSoilTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The lowest estimated soil temperature in Celcius. Only available for weather stations with soil moisture sensors."
+        },
+        "minTemperature": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The lowest (coldest) temperature to occur in the day."
+        },
+        "minWetBulbGlobeTemp": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The lowest Wet Bulb Globe temperature measured."
+        },
+        "minWindChill": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The lowest wind chill value."
+        },
+        "precipitationAmount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Total liquid equivalent precipitation quantity (rain, ice, or snow)."
+        },
+        "precipitationType": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Type of precipitation; rain, ice or snow."
+        },
+        "snowAmount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The total snow amount during the period."
+        },
+        "solarDHI": {
+          "type": "number",
+          "format": "double",
+          "description": "Direct Horizontal Irradiance"
+        },
+        "solarDNI": {
+          "type": "number",
+          "format": "double",
+          "description": "Direct Normal Irradiance"
+        },
+        "solarGHI": {
+          "type": "number",
+          "format": "double",
+          "description": "Global Horizontal Irradiance - Solar Radiation"
+        },
+        "stationId": {
+          "type": "string",
+          "description": "The alpha station identifier where the observation was made"
+        },
+        "sunrise": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time in ISO8601 format at which the first part of the sun becomes visible in the morning."
+        },
+        "sunset": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time in ISO8601 format at which the last part of the sun disappears below the horizon in the evening."
+        },
+        "weatherCode": {
+          "type": "integer",
+          "format": "int32",
+          "description": "A code relating to the description of the weather"
+        },
+        "weatherDescription": {
+          "type": "string",
+          "description": "A description of the weather, such as sunny, partly cloudy, raining etc."
+        }
+      },
+      "description": "Observations and Forecasts of ground based information observed at a particular station aggregated over the period of a single day local midnight to local midnight."
+    },
+    "TAFForecast": {
+      "required": [
+        "expirationDateTime",
+        "forecastType",
+        "rawText",
+        "sequence",
+        "validDateTime"
+      ],
+      "properties": {
+        "altimeter": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The forecast pressure reading for this period.  If null, than no forecast of pressure was made."
+        },
+        "cloudCover": {
+          "type": "array",
+          "description": "A collection of the cloud cover layers forecast for this period.",
+          "items": {
+            "$ref": "#/definitions/Cloud"
+          }
+        },
+        "expirationDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The end date and time for this particular forecast period.  All forecast weather elements are forecast to this date time"
+        },
+        "flightRuleCode": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The flight rule code - based on visibility and cloud cover readings that pertain to this period of the forecast."
+        },
+        "forecastType": {
+          "type": "string",
+          "description": "The type of forecast as defined by the TAF.  This is commonly values such as TEMPO, FM, PROB."
+        },
+        "probability": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The probability that the expected precipitation will occur.  If null, than no probability value was defined for this period."
+        },
+        "rawText": {
+          "type": "string",
+          "description": "The portion of the full TAF or RAMTAF text that pertains to the decoded values in this forecast section."
+        },
+        "sequence": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The sequence of the forecasts defining the correct order based on ascending values.  The higher the value the later the time period."
+        },
+        "validDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The start date and time for this particular forecast period.  All forecast weather elements are forecast from this date time"
+        },
+        "visibility": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The forecast visibility for this period.  If null, than no forecast of visibility was made."
+        },
+        "weather": {
+          "type": "array",
+          "description": "A collection of the weather conditions forecast for this period.  E.g. Rain and Snow",
+          "items": {
+            "$ref": "#/definitions/Weather"
+          }
+        },
+        "windDirection": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The forecast wind direction for this period.  If null, than no forecast of wind direction was made."
+        },
+        "windShearLevel": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The forecast wind shear level for this period.  If null, than no forecast of wind shear was made."
+        },
+        "windShearSpeed": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The forecast wind shear speed for this period.  If null, than no forecast of wind shear was made."
+        },
+        "windSpeed": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The forecast wind shear speed for this period.  If null, than no forecast of wind speed was made."
+        }
+      },
+      "description": "A period of future weather defined by the TAF or RAMTAF"
+    },
+    "Cloud": {
+      "properties": {
+        "cloudHeight": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The height of the cloud layer in feet.",
+          "minimum": 0.0,
+          "maximum": 9999.0
+        },
+        "condition": {
+          "type": "string",
+          "description": "Description of the cloud cover.  SKC - Sky Clear, SCT - Scattered, BKN - Broken"
+        }
+      },
+      "description": "A description of the clouds and heights"
+    },
+    "TAF": {
+      "required": [
+        "expirationDateTime",
+        "issuedDateTime",
+        "rawText",
+        "tafForecasts",
+        "validDateTime"
+      ],
+      "properties": {
+        "expirationDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The end of the period for which the forecast pertains."
+        },
+        "issuedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the TAF was created."
+        },
+        "rawText": {
+          "type": "string",
+          "description": "A TAF is a standard structured text string.  This is the full text of the TAF."
+        },
+        "tafForecasts": {
+          "type": "array",
+          "description": "A list of all the forecast periods and associated forecast data during the valid time period",
+          "items": {
+            "$ref": "#/definitions/TAFForecast"
+          }
+        },
+        "validDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The start of the period for which the forecast pertains."
+        }
+      },
+      "description": "A base of metadata associated with a Terminal Aerodrome Forecast - decoded from textual TAF or RAMTAF"
+    },
+    "CloudCover": {
+      "required": [
+        "cloudCover",
+        "height"
+      ],
+      "properties": {
+        "cloudCover": {
+          "type": "string",
+          "description": "The amount of clouds, typically represented by one of these values: NSC(No Significant Cloud), SKC(Sky Clear),CLR(Clear),FEW(Few Clouds),SCT(Scattered),BKN(Broken),OVC(Overcast),VV(Vertical Visibility)",
+          "enum": [
+            "CAVOK",
+            "SKC",
+            "CLR",
+            "NSC",
+            "FEW",
+            "SCT",
+            "BKN",
+            "OVC",
+            "VV"
+          ]
+        },
+        "cloudType": {
+          "type": "string",
+          "description": "Reports about special cloud types.  TCU(Towering Cumulus) or CB(Cumulonimbus) ",
+          "enum": [
+            "TCU",
+            "CB"
+          ]
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The height of the cloud cover in feet.",
+          "minimum": 0.0,
+          "maximum": 100000.0
+        }
+      },
+      "description": "Aviation METAR/SPECI recorded at an Aerodrome"
+    },
+    "Remark": {
+      "properties": {
+        "remarktext": {
+          "type": "string",
+          "description": "The evaluated remark text per the decoding of the remark value."
+        },
+        "remarkvalue": {
+          "type": "number",
+          "format": "double",
+          "description": "The remark per the METAR."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of the remark.  E.g.  SLP for sea level pressure."
+        }
+      },
+      "description": "METAR remark.  The order of the remarks, indicates the order obtained from the METAR."
+    }
+  }
+}

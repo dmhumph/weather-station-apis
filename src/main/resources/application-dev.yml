@@ -1,0 +1,12 @@
+camel:
+  springboot:
+    name: weather-station-api
+
+server:
+  port: 8080
+
+# disable all management enpoints except health
+endpoints:
+  enabled: false
+  health:
+    enabled: true

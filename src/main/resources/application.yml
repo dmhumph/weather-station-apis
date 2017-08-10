@@ -1,0 +1,8 @@
+camel:
+  springboot:
+    name: weather-station-api
+
+endpoints:
+  enabled: false
+  health:
+    enabled: true
