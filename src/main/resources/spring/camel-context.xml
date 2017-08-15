@@ -1,115 +1,119 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Configures the Camel Context -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:camel-cxf="http://camel.apache.org/schema/cxf" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd             http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd     http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd">
-	<bean
-		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
-		id="bean-66d2672d-c6c0-4984-bc31-90bc30bfaaef" />
-	<camelContext id="_camelContext1" xmlns="http://camel.apache.org/schema/spring"
-		xmlns:order="http://fabric8.com/examples/order/v7">
-		<dataFormats>
-			<xmljson id="xmljson" skipNamespaces="true" />
-		</dataFormats>
-		<restConfiguration apiContextPath="/api-doc"
-			bindingMode="off" component="servlet" contextPath="/weather"
-			enableCORS="true">
-			<dataFormatProperty key="prettyPrint" value="true" />
-			<apiProperty key="host" value="" />
-			<apiProperty key="api.version" value="Version 1.0" />
-			<apiProperty key="api.title" value="Weather REST API" />
-			<apiProperty key="api.description"
-				value="A set of REST services to provide capabilities for serving weather information." />
-			<apiProperty key="api.termsOfService" value="API Terms of Service" />
-			<apiProperty key="api.contact.name" value="Gary Sole" />
-			<apiProperty key="api.contact.email" value="gary.sole@dtn.com" />
-		</restConfiguration>
-		<rest consumes="application/json" path="/stations" produces="application/json">
-			<description>Weather Station API.</description>
-			<!-- this is a rest GET to view an organization by the given id -->
-			<get uri="/{stationId}/hourly-observations">
-				<description>Get observations by hour.</description>
-				<param dataType="string" defaultValue="1"
-					description="Version of the service endpoint" name="version"
-					required="true" type="path" />
-				<param dataType="string" defaultValue="KMSP"
-					description="An alpha station identifier." name="stationId"
-					required="true" type="path" />
-				<param dataType="integer"
-					description="The amount of hours worth of observations that should be returned in the result. This is a numeric value with a minimum of 1 and maximum 3. It is optional. If not provided, only the most recent/current observation will be provided.Required if lat is provided. Mutually exclusive of stationId"
-					name="hours" required="false" type="query" />
-				<param dataType="string"
-					description="The unit of measure or system used for this response. Use US for Imperial and SI for Metric"
-					name="units" required="false" type="query" />
-				<to uri="direct:hourly-observations" />
-			</get>
-		</rest>
-		<rest consumes="application/json" path="/stations" produces="application/json">
-			<description>Azure Function API.</description>
-			<!-- this is a rest GET to view an organization by the given id -->
-			<get uri="/{stationId}">
-				<description>Get observations via Azure Function</description>
-				<param dataType="string" defaultValue="1"
-					description="Version of the service endpoint" name="version"
-					required="true" type="path" />
-				<param dataType="string" defaultValue="KLAX"
-					description="An alpha station identifier." name="stationId"
-					required="true" type="path" />
-				<to uri="direct:azure-observations" />
-			</get>
-		</rest>
-		<route id="hourly-observations" streamCache="true">
-			<from id="_from1" uri="direct:hourly-observations" />
-			<setHeader headerName="currentDateTime">
-				<groovy>new Date().format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )</groovy>
-			</setHeader>
-			<choice>
-				<when>
-					<simple>${header.hours} == 1</simple>
-					<setHeader headerName="beginDatetime">
-						<groovy>use (groovy.time.TimeCategory) {(1.hours.ago).format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )}</groovy>
-					</setHeader>
-				</when>
-				<when>
-					<simple>${header.hours} == 2</simple>
-					<setHeader headerName="beginDatetime">
-						<groovy>use (groovy.time.TimeCategory) {(2.hours.ago).format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )}</groovy>
-					</setHeader>
-				</when>
-				<otherwise>
-					<setHeader headerName="beginDatetime">
-						<groovy>use (groovy.time.TimeCategory) {(3.hours.ago).format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )}</groovy>
-					</setHeader>
-				</otherwise>
-			</choice>
-			<setHeader headerName="Exchange.HTTP_QUERY" id="_setHeader1">
-				<simple>dataTypeMode=0001&amp;dataType=HourlyObservation&amp;startDate=${header.beginDatetime}&amp;endDate=${header.currentDateTime}&amp;stationId=${header.stationId}</simple>
-			</setHeader>
-			<to id="_to1"
-				uri="http4://weather.dtn.com/basic/rest-3.4/obsfcst.wsgi?bridgeEndpoint=true&amp;authUsername=mrosendo&amp;authPassword=MP0OEHokQN5N4qBf&amp;authenticationPreemptive=true&amp;authMethod=Basic" />
-			<convertBodyTo id="_convertBodyTo1" type="java.lang.String" />
-			<marshal id="_marshal1" ref="xmljson" />
-			<removeHeaders id="_removeHeaders2" pattern="*" />
-		</route>
-		<route id="azure-observations" streamCache="true">
-			<from id="_from2" uri="direct:azure-observations" />
-			<removeHeaders id="_removeHeaders1" pattern="CamelHttp*" />
-			<setHeader headerName="Exchange.HTTP_QUERY" id="_setHeader2">
-				<constant>code=3n5n2yTGRhQqOEw14ccTktfXQPwsrUdfkFVYQyp1apmnLRv0ePMqrg==</constant>
-			</setHeader>
-			<choice id="_choice1">
-				<when id="_when1">
-					<simple>${header.stationId} starts with 'K'</simple>
-					<toD id="_toD1"
-						uri="http4://az-wx-api-pre-fa.azurewebsites.net/api/weather/stations/${header.stationId}?bridgeEndpoint=true" />
-				</when>
-				<otherwise id="_otherwise1">
-					<toD id="_toD2"
-						uri="http4://az-wx-api-pre-fa.azurewebsites.net/api/weather/stations/K${header.stationId}?bridgeEndpoint=true" />
-				</otherwise>
-			</choice>
-			<convertBodyTo id="_convertBodyTo2" type="java.lang.String" />
-			<removeHeaders id="_removeHeaders3" pattern="*" />
-		</route>
-	</camelContext>
+    xmlns:camel-cxf="http://camel.apache.org/schema/cxf"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="             http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd             http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd     http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd">
+    <bean
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" id="bean-66d2672d-c6c0-4984-bc31-90bc30bfaaef"/>
+    <camelContext id="_camelContext1"
+        xmlns="http://camel.apache.org/schema/spring" xmlns:order="http://fabric8.com/examples/order/v7">
+        <dataFormats>
+            <xmljson id="xmljson" skipNamespaces="true"/>
+        </dataFormats>
+        <restConfiguration apiContextPath="/api-doc" bindingMode="off"
+            component="servlet" contextPath="/weather" enableCORS="true">
+            <dataFormatProperty key="prettyPrint" value="true"/>
+            <apiProperty key="host" value=""/>
+            <apiProperty key="api.version" value="Version 1.0"/>
+            <apiProperty key="api.title" value="Weather REST API"/>
+            <apiProperty key="api.description" value="A set of REST services to provide capabilities for serving weather information."/>
+            <apiProperty key="api.termsOfService" value="API Terms of Service"/>
+            <apiProperty key="api.contact.name" value="Gary Sole"/>
+            <apiProperty key="api.contact.email" value="gary.sole@dtn.com"/>
+        </restConfiguration>
+        <rest consumes="application/json" path="/stations" produces="application/json">
+            <description>Weather Station API.</description>
+            <!-- this is a rest GET to view an organization by the given id -->
+            <get uri="/{stationId}/hourly-observations">
+                <description>Get observations by hour.</description>
+                <param dataType="string" defaultValue="1"
+                    description="Version of the service endpoint"
+                    name="version" required="true" type="path"/>
+                <param dataType="string" defaultValue="KMSP"
+                    description="An alpha station identifier."
+                    name="stationId" required="true" type="path"/>
+                <param dataType="integer"
+                    description="The amount of hours worth of observations that should be returned in the result. This is a numeric value with a minimum of 1 and maximum 3. It is optional. If not provided, only the most recent/current observation will be provided.Required if lat is provided. Mutually exclusive of stationId"
+                    name="hours" required="false" type="query"/>
+                <param dataType="string"
+                    description="The unit of measure or system used for this response. Use US for Imperial and SI for Metric"
+                    name="units" required="false" type="query"/>
+                <to uri="direct:hourly-observations"/>
+            </get>
+        </rest>
+        <rest consumes="application/json" path="/stations" produces="application/json">
+            <description>Azure Function API.</description>
+            <!-- this is a rest GET to view an organization by the given id -->
+            <get uri="/{stationId}">
+                <description>Get observations via Azure Function</description>
+                <param dataType="string" defaultValue="1"
+                    description="Version of the service endpoint"
+                    name="version" required="true" type="path"/>
+                <param dataType="string" defaultValue="KLAX"
+                    description="An alpha station identifier."
+                    name="stationId" required="true" type="path"/>
+                <to uri="direct:azure-observations"/>
+            </get>
+        </rest>
+        <route id="hourly-observations" streamCache="true">
+            <from id="_from1" uri="direct:hourly-observations"/>
+            <setHeader headerName="currentDateTime" id="_setHeader3">
+                <groovy>new Date().format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )</groovy>
+            </setHeader>
+            <choice id="_choice1">
+                <when id="_when1">
+                    <simple>${header.hours} == 1</simple>
+                    <setHeader headerName="beginDatetime" id="_setHeader4">
+                        <groovy>use (groovy.time.TimeCategory) {(1.hours.ago).format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )}</groovy>
+                    </setHeader>
+                </when>
+                <when id="_when2">
+                    <simple>${header.hours} == 2</simple>
+                    <setHeader headerName="beginDatetime" id="_setHeader5">
+                        <groovy>use (groovy.time.TimeCategory) {(2.hours.ago).format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )}</groovy>
+                    </setHeader>
+                </when>
+                <otherwise id="_otherwise1">
+                    <setHeader headerName="beginDatetime" id="_setHeader6">
+                        <groovy>use (groovy.time.TimeCategory) {(3.hours.ago).format( 'yyyy-MM-dd\'T\'HH:mm:ssZ' )}</groovy>
+                    </setHeader>
+                </otherwise>
+            </choice>
+            <choice id="_choice2">
+                <when id="_when3">
+                    <simple>${header.stationId} starts with 'K'</simple>
+                    <setHeader headerName="Exchange.HTTP_QUERY" id="_setHeader7">
+                        <simple>dataTypeMode=0001&amp;dataType=HourlyObservation&amp;startDate=${header.beginDatetime}&amp;endDate=${header.currentDateTime}&amp;stationId=${header.stationId}</simple>
+                    </setHeader>
+                </when>
+                <otherwise id="_otherwise2">
+                    <setHeader headerName="Exchange.HTTP_QUERY" id="_setHeader8">
+                        <simple>dataTypeMode=0001&amp;dataType=HourlyObservation&amp;startDate=${header.beginDatetime}&amp;endDate=${header.currentDateTime}&amp;stationId=K${header.stationId}</simple>
+                    </setHeader>
+                </otherwise>
+            </choice>
+            <to id="_to1" uri="http4://weather.dtn.com/basic/rest-3.4/obsfcst.wsgi?bridgeEndpoint=true&amp;authUsername={{api.username}}&amp;authPassword={{api.password}}&amp;authenticationPreemptive=true&amp;authMethod=Basic"/>
+            <convertBodyTo id="_convertBodyTo1" type="java.lang.String"/>
+            <marshal id="_marshal1" ref="xmljson"/>
+            <removeHeaders id="_removeHeaders2" pattern="*"/>
+        </route>
+        <route id="azure-observations" streamCache="true">
+            <from id="_from2" uri="direct:azure-observations"/>
+            <removeHeaders id="_removeHeaders1" pattern="CamelHttp*"/>
+            <setHeader headerName="Exchange.HTTP_QUERY" id="_setHeader2">
+                <constant>code=3n5n2yTGRhQqOEw14ccTktfXQPwsrUdfkFVYQyp1apmnLRv0ePMqrg==</constant>
+            </setHeader>
+            <choice id="_choice3">
+                <when id="_when4">
+                    <simple>${header.stationId} starts with 'K'</simple>
+                    <toD id="_toD1" uri="http4://az-wx-api-pre-fa.azurewebsites.net/api/weather/stations/${header.stationId}?bridgeEndpoint=true"/>
+                </when>
+                <otherwise id="_otherwise3">
+                    <toD id="_toD2" uri="http4://az-wx-api-pre-fa.azurewebsites.net/api/weather/stations/K${header.stationId}?bridgeEndpoint=true"/>
+                </otherwise>
+            </choice>
+            <convertBodyTo id="_convertBodyTo2" type="java.lang.String"/>
+            <removeHeaders id="_removeHeaders3" pattern="*"/>
+        </route>
+    </camelContext>
 </beans>
